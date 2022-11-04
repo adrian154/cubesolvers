@@ -1,2 +1,3 @@
 # cubesolvers
-a collection of rubik's cube solvers
+
+3x3 rubik's cube solvers (WIP)
