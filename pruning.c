@@ -13,12 +13,7 @@ int get_corner_coordinate(Cube *cube) {
         orientation_coord += base * cube->corner_orientations[i];
         base *= 3;
     }
-
-    /*
-     * Use Korf's bitstring approach to calculate Lehmer code in linear time.
-     * We can further speed it up by using popcount instead of indexing into a
-     * table as he originally suggested.
-     */
+    
     int seen_mask = 0, corner_coord = 0;
     for(int i = 0; i < 7; i++) {
         
@@ -30,11 +25,17 @@ int get_corner_coordinate(Cube *cube) {
         /*
          * In a Lehmer code, we look at each element and subtract the number of
          * elements to the left of it in the permutation whose value is lower
-         * than the element itself.
+         * than the element itself. We can treat the resulting values as digits
+         * of a factoradic number and convert it to a regular integer, producing
+         * a unique mapping for each valid permutation.
          * 
-         * We can treat the resulting values as digits of a factoradic number
-         * and convert it to a regular integer, producing a unique mapping for
-         * each valid permutation.
+         * To quickly determine how many values smaller than the current value
+         * we've seen so far, we can simply shift seen_mask so that it only 
+         * contains bits representing values smaller than the current one and
+         * use __builtin_popcount to quickly count the 1's. This is basically
+         * identical to Korf's suggested approach, except he instead used the
+         * shifted bitmask as an index into a fixed table (probably since
+         * POPCNT wasn't a thing back then and memory was faster).
          */
         // TODO: Make this code portable (fallback for __builtin_popcount)
         corner_coord += (cubie - __builtin_popcount(seen_mask >> (8 - cubie))) * factorial[i];
