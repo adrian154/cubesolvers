@@ -42,7 +42,7 @@ int get_corner_coordinate(Cube *cube) {
 
     }
 
-    // orientation_coord is in {0..2186}
+    // 3^7=2187
     return corner_coord * 2187 + orientation_coord;
 
 }
