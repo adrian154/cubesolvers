@@ -226,14 +226,15 @@ void print_cube(Cube *cube, bool terminal) {
 
 }
 
-
 /*
- * Cubies in the 'neutral orientation' are not affected by the turn.
- * For example, the ULF cubie is not affected by U/D turns.
- * Other cubies swap between the two possible orientations. 
- * We implement this as a lookup for simplicity. 
+ * If a corner is facing the same direction as the axis of a quarter turn, its
+ * orientation isn't affected. Otherwise, it swaps between the two other 
+ * possible values. 
+ * 
+ * Example: if a cubie in the U face has orientation 0 (facing up), it will
+ * remain in that orientation. Thus, we say the axis of a U-turn is 0.
  */
-void orient_corner(Cube *cube, int corner_pos, int neutral_orientation) {
+void orient_corner(Cube *cube, int corner_pos, int axis) {
     
     int cubie = cube->corners[corner_pos];
     int orientation = cube->corner_orientations[cubie];
@@ -244,16 +245,17 @@ void orient_corner(Cube *cube, int corner_pos, int neutral_orientation) {
         1, 0, 2
     };
 
-    cube->corner_orientations[cubie] = orientations[neutral_orientation * 3 + orientation];
+    cube->corner_orientations[cubie] = orientations[axis * 3 + orientation];
 
 }
 
+// flip orientation of an edge
 void orient_edge(Cube *cube, int edge) {
     cube->edge_orientations[edge] = !cube->edge_orientations[edge];
 }
 
 // `corner0..3` and `edge0..3` are lists of corner/edge positions, clockwise
-void apply_turn(Cube *cube, int neutral_orientation, int degree, int corner0, int corner1, int corner2, int corner3, int edge0, int edge1, int edge2, int edge3) {
+void apply_turn(Cube *cube, int axis, int degree, int corner0, int corner1, int corner2, int corner3, int edge0, int edge1, int edge2, int edge3) {
 
     if(degree == TURN_FLIP) {
 
@@ -303,13 +305,13 @@ void apply_turn(Cube *cube, int neutral_orientation, int degree, int corner0, in
             cube->edges[edge3] = temp;
         }
 
-        orient_corner(cube, corner0, neutral_orientation);
-        orient_corner(cube, corner1, neutral_orientation);
-        orient_corner(cube, corner2, neutral_orientation);
-        orient_corner(cube, corner3, neutral_orientation);
+        orient_corner(cube, corner0, axis);
+        orient_corner(cube, corner1, axis);
+        orient_corner(cube, corner2, axis);
+        orient_corner(cube, corner3, axis);
 
         // only F/B quarter turns affect edge orientation
-        if(neutral_orientation == 2) {
+        if(axis == 2) {
             orient_edge(cube, cube->edges[edge0]);
             orient_edge(cube, cube->edges[edge1]);
             orient_edge(cube, cube->edges[edge2]);
