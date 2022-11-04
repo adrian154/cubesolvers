@@ -1,6 +1,8 @@
 #ifndef __PRUNING_H
 #define __PRUNING_H
 
+#include "3x3.h"
+
 /*
  * Our algorithm of choice for searching the Rubik's cube game tree is iter-
  * ative deepening A*. In a nutshell, IDA* conducts depth first searches of
@@ -30,6 +32,10 @@
  * Korf & Schultze in "Large-Scale Parallel Breadth-First Search", although for
  * practical purposes since n is usually small, the improved time complexity
  * (compared with the O(n^2) naive approach) is the principal advantage.
+ * 
+ * Kociemba refers to these indexes as coordinates in his writings on the cube,
+ * so we'll call them coordinates too for the sake of clarity.
  */
+int get_corner_coordinate(Cube *cube);
 
 #endif
