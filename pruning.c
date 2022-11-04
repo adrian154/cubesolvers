@@ -13,7 +13,7 @@ int get_corner_coordinate(Cube *cube) {
         orientation_coord += base * cube->corner_orientations[i];
         base *= 3;
     }
-    
+
     int seen_mask = 0, corner_coord = 0;
     for(int i = 0; i < 7; i++) {
         
@@ -32,10 +32,10 @@ int get_corner_coordinate(Cube *cube) {
          * To quickly determine how many values smaller than the current value
          * we've seen so far, we can simply shift seen_mask so that it only 
          * contains bits representing values smaller than the current one and
-         * use __builtin_popcount to quickly count the 1's. This is basically
-         * identical to Korf's suggested approach, except he instead used the
-         * shifted bitmask as an index into a fixed table (probably since
-         * POPCNT wasn't a thing back then and memory was faster).
+         * use __builtin_popcount to count the 1's. This is basically identical 
+         * to Korf's suggested approach, except he instead used the shifted
+         * bitmask as an index into a fixed table (probably since POPCNT wasn't
+         * a thing back then and memory was faster).
          */
         // TODO: Make this code portable (fallback for __builtin_popcount)
         corner_coord += (cubie - __builtin_popcount(seen_mask >> (8 - cubie))) * factorial[i];
