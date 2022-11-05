@@ -87,7 +87,7 @@ typedef struct {
 } Cube;
 
 bool is_solved(Cube *cube);
-Cube create_cube();
+Cube create_solved_cube();
 void get_cube_colors(Cube *cube, char *colors);
 void print_cube(Cube *cube, bool terminal);
 void do_move(Cube *cube, int face, int degree);

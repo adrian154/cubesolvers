@@ -35,7 +35,12 @@
  * 
  * Kociemba refers to these indexes as coordinates in his writings on the cube,
  * so we'll call them coordinates too for the sake of clarity.
+ *
+ * SYMMETRY
+ * 
+ * A bigger pruning table usually means more aggressive pruning and thus 
  */
+
 int get_corner_coordinate(Cube *cube);
 
 #endif

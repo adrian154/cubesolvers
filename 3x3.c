@@ -23,7 +23,7 @@ bool is_solved(Cube *cube) {
 
 }
 
-Cube create_cube() {
+Cube create_solved_cube() {
     Cube cube;
     for(int i = 0; i < 8; i++) {
         cube.corners[i] = i;
@@ -34,6 +34,14 @@ Cube create_cube() {
         cube.edge_orientations[i] =0;
     }
     return cube;
+}
+
+Cube create_random_cube() {
+
+    Cube cube;
+
+    // 
+    
 }
 
 // Convert face color to ANSI escape code

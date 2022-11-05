@@ -35,7 +35,7 @@ int get_corner_coordinate(Cube *cube) {
          * use __builtin_popcount to count the 1's. This is basically identical 
          * to Korf's suggested approach, except he instead used the shifted
          * bitmask as an index into a fixed table (probably since POPCNT wasn't
-         * a thing back then and memory was faster).
+         * a thing back then and memory accesses were cheaper).
          */
         // TODO: Make this code portable (fallback for __builtin_popcount)
         corner_coord += (cubie - __builtin_popcount(seen_mask >> (8 - cubie))) * factorial[i];
