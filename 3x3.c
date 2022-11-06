@@ -1,6 +1,7 @@
 // See 3x3.h for details on cube representation.
 #include "3x3.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 // Check if a cube is solved.
 bool is_solved(Cube *cube) {
@@ -36,12 +37,76 @@ Cube create_solved_cube() {
     return cube;
 }
 
-Cube create_random_cube() {
+// Fisher-Yates shuffle
+void shuffle(uint8_t *list, int size) {
 
+    for(int i = size - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int tmp = list[i];
+        list[i] = list[j];
+        list[j] = tmp;
+    }
+
+}
+
+// determine parity of a permutation by counting inversions
+int compute_parity(uint8_t *list, int size) {
+    int inversions = 0;
+    for(int i = 0; i < size; i++) {
+        for(int j = i + 1; j < size; j++) {
+            if(list[i] > list[j]) inversions++;
+        }
+    }
+    return inversions % 2;
+}
+
+// create solvable cube
+Cube create_random_cube() {
+    
     Cube cube;
 
-    // 
-    
+    for(int i = 0; i < 8; i++) {
+        cube.corners[i] = i;
+    }
+
+    for(int i = 0; i < 12; i++) {
+        cube.edges[i] = i;
+    }
+
+    // CONSTRAINT: corner permutation parity must match edge permutation parity
+    if(compute_parity(cube.corners, 8) != compute_parity(cube.edges, 12)) {
+
+        // change parity of edges by doing a swap
+        int tmp = cube.edges[0];
+        cube.edges[0] = cube.edges[1];
+        cube.edges[1] = tmp;
+
+    }
+
+    // CONSTRAINT: total edge orientation must be even
+    int total_eo = 0;
+    for(int i = 0; i < 11; i++) {
+        int eo = rand() & 1;
+        total_eo += eo;
+        cube.edge_orientations[i] = eo;
+    }
+
+    cube.edge_orientations[11] = total_eo % 2;
+
+    // CONSTRAINT: total corner orientations must be divisible by three
+    int total_co = 0;
+    for(int i = 0; i < 7; i++) {
+        int co = rand() % 3;
+        total_co += co;
+        cube.corner_orientations[i] = co;    
+    }
+
+    if(total_co % 3 != 0) {
+        cube.corner_orientations[7] = 3 - total_co % 3;
+    }
+
+    return cube;
+
 }
 
 // Convert face color to ANSI escape code
@@ -49,7 +114,7 @@ const char *get_escape(char color) {
     switch(color) {
         case 'R': return "\x1b[48;2;255;0;0m";
         case 'O': return "\x1b[48;2;255;128;0m";
-        case 'Y': return "\x1b[48;2;255;255;0m";
+        case 'Y': return "\x1b[48;2;252;219;3m";
         case 'G': return "\x1b[48;2;0;255;0m";;
         case 'B': return "\x1b[48;2;0;0;255m";
         case 'W': return "\x1b[48;2;255;255;255m";
@@ -57,25 +122,17 @@ const char *get_escape(char color) {
     }
 }
 
-// See get_cube_colors() for info on what this function does.
-int get_diagonal(int corner_pos) {
-    return corner_pos == ULF ||
-           corner_pos == URB ||
-           corner_pos == DLB ||
-           corner_pos == DRF;
-}
-
 // Color the facelets for a corner cubie
 void color_corner(char colors[], int corner_pos, char color1, char color2, char color3) {
     switch(corner_pos) {
         case ULB: colors[12] = color1; colors[11] = color2; colors[6]  = color3; break;
-        case ULF: colors[36] = color1; colors[35] = color2; colors[45] = color3; break;
-        case URB: colors[14] = color1; colors[15] = color2; colors[8]  = color3; break;
+        case ULF: colors[36] = color1; colors[45] = color2; colors[35] = color3; break;
+        case URB: colors[14] = color1; colors[8]  = color2; colors[15] = color3; break;
         case URF: colors[38] = color1; colors[39] = color2; colors[47] = color3; break;
-        case DLB: colors[20] = color1; colors[9]  = color2; colors[0]  = color3; break;
+        case DLB: colors[20] = color1; colors[0]  = color2; colors[9]  = color3; break;
         case DLF: colors[44] = color1; colors[33] = color2; colors[51] = color3; break;
         case DRB: colors[18] = color1; colors[17] = color2; colors[2]  = color3; break;
-        case DRF: colors[42] = color1; colors[41] = color2; colors[53] = color3; break;
+        case DRF: colors[42] = color1; colors[53] = color2; colors[41] = color3; break;
     }
 }
 
@@ -150,31 +207,26 @@ void get_cube_colors(Cube *cube, char *colors) {
          * position as the orientation for our cube, so white is on top and 
          * green is in front.
          */
-        char color1 = cubie & 4 ? 'Y' : 'W',
-             color2 = cubie & 2 ? 'R' : 'O',
-             color3 = cubie & 1 ? 'G' : 'B';
-
-        /*
-         * The cubie's orientation tells us the color of one of the stickers,
-         * but the order of the other two depends on whether the cubie's current
-         * position is adjacent or diagonal from its home position.
-         */
-        int orientation = cube->corner_orientations[cubie];
-        if(get_diagonal(cubie) == get_diagonal(corner_pos)) {
-            if(orientation == 0)
-                color_corner(colors, corner_pos, color1, color2, color3);
-            else if(orientation == 1)
-                color_corner(colors, corner_pos, color3, color1, color2);
-            else
-                color_corner(colors, corner_pos, color2, color3, color1);
-        } else {
-            if(orientation == 0)
-                color_corner(colors, corner_pos, color1, color3, color2);
-            else if(orientation == 1)
-                color_corner(colors, corner_pos, color2, color1, color3);
-            else
-                color_corner(colors, corner_pos, color3, color2, color1);
+        char color1, color2, color3;
+        switch(cubie) {
+            case ULB: color1 = 'W'; color2 = 'O'; color3 = 'B'; break;
+            case ULF: color1 = 'W'; color2 = 'G'; color3 = 'O'; break;
+            case URB: color1 = 'W'; color2 = 'B'; color3 = 'R'; break;
+            case URF: color1 = 'W'; color2 = 'R'; color3 = 'G'; break;
+            case DLB: color1 = 'Y'; color2 = 'B'; color3 = 'O'; break;
+            case DLF: color1 = 'Y'; color2 = 'O'; color3 = 'G'; break;
+            case DRB: color1 = 'Y'; color2 = 'R'; color3 = 'B'; break;
+            case DRF: color1 = 'Y'; color2 = 'G'; color3 = 'R'; break;
         }
+
+        // Shift colors based on the piece's orientation
+        int orientation = cube->corner_orientations[cubie];
+        if(orientation == 0)
+            color_corner(colors, corner_pos, color1, color2, color3);
+        else if(orientation == 1)
+            color_corner(colors, corner_pos, color3, color1, color2);
+        else
+            color_corner(colors, corner_pos, color2, color3, color1);
 
     }
 
@@ -182,7 +234,6 @@ void get_cube_colors(Cube *cube, char *colors) {
         
         int edge = cube->edges[edge_pos];
 
-        // I couldn't come up with a more clever way to encode the edges, so...
         char color1 = '?', color2 = '?';
         switch(edge) {
             case UL: color1 = 'W'; color2 = 'O'; break;
@@ -234,31 +285,13 @@ void print_cube(Cube *cube, bool terminal) {
 
 }
 
-/*
- * If a corner is facing the same direction as the axis of a quarter turn, its
- * orientation isn't affected. Otherwise, it swaps between the two other 
- * possible values. 
- * 
- * Example: if a cubie in the U face has orientation 0 (facing up), it will
- * remain in that orientation. Thus, we say the axis of a U-turn is 0.
- */
-void orient_corner(Cube *cube, int corner_pos, int axis) {
-    
+void update_corner_orientation(Cube *cube, int corner_pos, int amount) {
     int cubie = cube->corners[corner_pos];
-    int orientation = cube->corner_orientations[cubie];
-    
-    static int orientations[] = {
-        0, 2, 1,
-        2, 1, 0,
-        1, 0, 2
-    };
-
-    cube->corner_orientations[cubie] = orientations[axis * 3 + orientation];
-
+    cube->corner_orientations[cubie] = (cube->corner_orientations[cubie] + amount) % 3;
 }
 
 // flip orientation of an edge
-void orient_edge(Cube *cube, int edge) {
+void flip_edge(Cube *cube, int edge) {
     cube->edge_orientations[edge] = !cube->edge_orientations[edge];
 }
 
@@ -313,17 +346,19 @@ void apply_turn(Cube *cube, int axis, int degree, int corner0, int corner1, int 
             cube->edges[edge3] = temp;
         }
 
-        orient_corner(cube, corner0, axis);
-        orient_corner(cube, corner1, axis);
-        orient_corner(cube, corner2, axis);
-        orient_corner(cube, corner3, axis);
+        if(axis != 0) {
+            update_corner_orientation(cube, corner0, 2);
+            update_corner_orientation(cube, corner1, 1);
+            update_corner_orientation(cube, corner2, 2);
+            update_corner_orientation(cube, corner3, 1);
+        }
 
         // only F/B quarter turns affect edge orientation
         if(axis == 2) {
-            orient_edge(cube, cube->edges[edge0]);
-            orient_edge(cube, cube->edges[edge1]);
-            orient_edge(cube, cube->edges[edge2]);
-            orient_edge(cube, cube->edges[edge3]);
+            flip_edge(cube, cube->edges[edge0]);
+            flip_edge(cube, cube->edges[edge1]);
+            flip_edge(cube, cube->edges[edge2]);
+            flip_edge(cube, cube->edges[edge3]);
         }
 
     }
@@ -332,11 +367,56 @@ void apply_turn(Cube *cube, int axis, int degree, int corner0, int corner1, int 
 
 void do_move(Cube *cube, int face, int degree) {
     switch(face) {
-        case FACE_U: apply_turn(cube, 0, degree, ULF, ULB, URB, URF, UB, UR, UF, UL); break;
+        case FACE_U: apply_turn(cube, 0, degree, ULB, URB, URF, ULF, UB, UR, UF, UL); break;
         case FACE_D: apply_turn(cube, 0, degree, DRF, DRB, DLB, DLF, DF, DR, DB, DL); break;
         case FACE_L: apply_turn(cube, 1, degree, ULB, ULF, DLF, DLB, UL, FL, DL, BL); break;
         case FACE_R: apply_turn(cube, 1, degree, URF, URB, DRB, DRF, UR, BR, DR, FR); break;
         case FACE_B: apply_turn(cube, 2, degree, URB, ULB, DLB, DRB, UB, BL, DB, BR); break;
-        case FACE_F: apply_turn(cube, 2, degree, URF, DRF, DLF, ULF, UF, FR, DF, FL); break;
+        case FACE_F: apply_turn(cube, 2, degree, ULF, URF, DRF, DLF, UF, FR, DF, FL); break;
     }
+}
+
+// Apply a space-separated sequence of moves to a cube. 
+void do_moves(Cube *cube, const char *moves) {
+
+    int  face = -1;
+
+    while(true) {
+        
+        char cur = *moves;
+        *moves++;
+
+        if(face != -1) {
+            switch(cur) {
+                case '\'': do_move(cube, face, TURN_CCW); break;
+                case '2': do_move(cube, face, TURN_FLIP); break;
+                case '\0': // <fall through>
+                case ' ': do_move(cube, face, TURN_CW); break;
+                default:
+                    printf("expected turn degree but got '%c'\n", cur);
+                    return;
+            }
+            face = -1;
+        } else {
+            switch(cur) {
+                case 'U': face = FACE_U; break;
+                case 'D': face = FACE_D; break;
+                case 'L': face = FACE_L; break;
+                case 'R': face = FACE_R; break;
+                case 'B': face = FACE_B; break;
+                case 'F': face = FACE_F; break;
+                case ' ': // fall through
+                case '\0': break;
+                default:
+                    printf("expected a cube face but got '%c'\n", cur);
+                    return;
+            }
+        }
+
+        if(cur == '\0') {
+            return;
+        }
+
+    }
+
 }

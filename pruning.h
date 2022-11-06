@@ -13,12 +13,12 @@
  * 
  * We construct an admissible heuristic (never overestimate number of remaining
  * moves) through the use of pattern databases/pruning tables. It's not possible
- * for us to index the number of moves required to solve every one of the 43e19
- * reachable cube states, but we can create pattern databases cataloguing the
- * number of moves to solve a *subproblem* of solving the cube. For example,
- * we can determine the number of moves necessary to solve every possible 
- * combination of corner pieces; this is an admissible heuristic because any
- * solution that solves the cube will also solve the corners.
+ * for us to index every one of the 43e19 reachable cube states, but we can
+ * create pattern databases cataloguing the number of moves to solve a
+ * *subproblem* of solving the cube. For example, we can determine the number of
+ * moves necessary to solve every possible combination of corner pieces; this is
+ * an admissible heuristic because any solution that solves the cube will also
+ * solve the corners.
  * 
  * PATTERN DATABASE INDEXING
  * 
@@ -38,7 +38,7 @@
  *
  * SYMMETRY
  * 
- * A bigger pruning table usually means more aggressive pruning and thus 
+ * A bigger pruning table usually means more aggressive 
  */
 
 int get_corner_coordinate(Cube *cube);

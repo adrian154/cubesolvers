@@ -6,7 +6,6 @@
 #include <stdint.h>
 
 // Corner positions 
-// bit 0 = B/F, bit 1 = L/R, bit 2 = U/D
 #define ULB 0
 #define ULF 1
 #define URB 2
@@ -60,13 +59,12 @@
  * in position 1, etc. 
  * 
  * In addition to its position, each corner can also be in one of three orien-
- * tations. Our arbitrary convention is that the orientation of each cubie in
- * the solved state is 0. For example, when in its home position, the white 
- * sticker of the ULF cubie is facing U. In orientation 1, the white sticker
- * faces L, and in orientation 2 the white sticker faces F. If the cubie is not
- * in its home position, the same rules are applied to whatever spot it happens
- * to be in.
- *  
+ * tations. Every corner is always in the top or bottom slice, so we choose to
+ * use this slice as the up direction in our frame of reference. An orientation
+ * of 1 represents one twist clockwise, and an orientation of 2 represents two
+ * twists clockwise. The benefit of this system is that the total corner
+ * orientation will always be divisible by three.
+ * 
  * EDGE REPRESENTATION
  * 
  * Edges are similar to corners, except there are now 12 possible positions.
@@ -88,8 +86,10 @@ typedef struct {
 
 bool is_solved(Cube *cube);
 Cube create_solved_cube();
+Cube create_random_cube();
 void get_cube_colors(Cube *cube, char *colors);
 void print_cube(Cube *cube, bool terminal);
 void do_move(Cube *cube, int face, int degree);
+void do_moves(Cube *cube, const char *moves);
 
 #endif
