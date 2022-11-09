@@ -384,7 +384,7 @@ void do_moves(Cube *cube, const char *moves) {
     while(true) {
         
         char cur = *moves;
-        *moves++;
+        moves++;
 
         if(face != -1) {
             switch(cur) {
