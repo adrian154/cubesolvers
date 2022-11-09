@@ -150,6 +150,9 @@ Cube create_random_cube() {
         cube.edges[i] = i;
     }
 
+    shuffle(cube.corners, 8);
+    shuffle(cube.edges, 12);
+
     // CONSTRAINT: corner permutation parity must match edge permutation parity
     if(compute_parity(cube.corners, 8) != compute_parity(cube.edges, 12)) {
 
@@ -178,9 +181,7 @@ Cube create_random_cube() {
         cube.corner_orientations[i] = co;    
     }
 
-    if(total_co % 3 != 0) {
-        cube.corner_orientations[7] = 3 - total_co % 3;
-    }
+    cube.corner_orientations[7] = (3 - total_co % 3) % 3;
 
     return cube;
 

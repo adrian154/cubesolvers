@@ -21,9 +21,11 @@
  *
  * We choose to work with coordinates instead of the cubie-based cube model in
  * our solver. Instead of recalculating coordinates after moves are applied, we
- * use fixed lookup tables to simulate coordinate multiplication.
+ * use fixed lookup tables for coordinate multiplication.
  */
 
 void init_mult_tables();
+int mult_co(int co, int move);
+int mult_cp(int cp, int move);
 
 #endif
