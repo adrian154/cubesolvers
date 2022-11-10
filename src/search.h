@@ -27,6 +27,6 @@
  * we cannot eliminate certin branches), but that's fine. 
  */
 
-void init_pruning_tables();
+void init_pruning_table();
 
 #endif

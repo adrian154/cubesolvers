@@ -3,12 +3,37 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define TABLE_SIZE 88179840
 
 uint8_t *table;
 
-void init_pruning_tables() {
+void calculate_table_stats() {
+
+    int freq[32];
+    for(int i = 0; i < 32; i++) {
+        freq[i] = 0;
+    }
+
+    int max = 0, sum = 0;
+    for(int i = 0; i < TABLE_SIZE; i++) {
+        freq[table[i]]++;
+        max = table[i] > max ? table[i] : max;
+        sum += table[i];
+    }
+
+    for(int i = 0; i <= max; i++) {
+        printf("depth %d: %d (%.2f%%)\n", i, freq[i], (double)freq[i] * 100 / TABLE_SIZE);
+    }
+
+    printf("expected value: %.2f\n", (double)sum / TABLE_SIZE);
+
+}
+
+void build_pruning_table() {
+
+    printf("building pruning table...\n");
 
     table = malloc(TABLE_SIZE);
     for(int i = 0; i < TABLE_SIZE; i++) {
@@ -54,7 +79,36 @@ void init_pruning_tables() {
     }
 
     FILE *fp = fopen("corners.prune", "wb");
-    fwrite(table, 1, TABLE_SIZE, fp);
+    if(fp == NULL) {
+        perror("failed to open pruning table for writing");
+        exit(1);
+    }
+
+    if(fwrite(table, 1, TABLE_SIZE, fp) != TABLE_SIZE) {
+        perror("failed to write pruning table");
+        fclose(fp);
+        exit(1);
+    }
+
     fclose(fp);    
+    calculate_table_stats();
+
+}
+
+void init_pruning_table() {
+
+    FILE *fp = fopen("corners.prune", "rb");
+    if(fp == NULL) {
+        perror("couldn't open pruning table");
+        build_pruning_table();
+    } else {
+        fread(table, 1, TABLE_SIZE, fp);
+        if(ferror(fp)) {
+            perror("failed to read pruning table");
+            fclose(fp);
+            exit(1);
+        }
+        fclose(fp);
+    }
 
 }

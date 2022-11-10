@@ -1,4 +1,5 @@
 #include "search.h"
+#include <stdio.h>
 
 int main() {
 
@@ -6,6 +7,6 @@ int main() {
     init_mult_tables();
 
     printf("initializing pruning tables...\n");
-    init_pruning_tables();
+    init_pruning_table();
 
 }
