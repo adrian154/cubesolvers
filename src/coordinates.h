@@ -2,6 +2,7 @@
 #define __COORDINATES_H
 
 #include <stdint.h>
+#include "3x3.h"
 
 /*
  * The Rubik's Cube group, usually just referred to as the cube group or G,
@@ -25,8 +26,12 @@
  */
 
 void init_mult_tables();
+int compute_co_coord(Cube *cube);
+int compute_cp_coord(Cube *cube);
+int compute_eop1_coord(Cube *cube, int edge);
 int mult_co(int co, int move);
 int mult_cp(int cp, int move);
 int mult_eop1(int eop1, int move);
+int move_to_int(int face, int degree);
 
 #endif

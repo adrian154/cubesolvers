@@ -1,4 +1,3 @@
-#include "3x3.h"
 #include "coordinates.h"
 #include <string.h>
 #include <stdlib.h>
@@ -69,7 +68,7 @@ int compute_cp_coord(Cube *cube) {
  */
 int compute_eop1_coord(Cube *cube, int edge) {
 
-    int edge_pos;
+    int edge_pos = 0;
     for(int i = 0; i < 12; i++) {
         if(cube->edges[i] == edge) {
             edge_pos = i;

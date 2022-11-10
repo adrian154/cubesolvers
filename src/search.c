@@ -1,5 +1,6 @@
 #include "search.h"
 #include "coordinates.h"
+#include "3x3.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -30,6 +31,12 @@ void calculate_table_stats() {
 
     printf("expected value: %.2f\n", (double)sum / TABLE_SIZE);
 
+}
+
+int build_table_index(int eop1, int cp, int co) {
+    return eop1 * 88179840 +
+           cp * 2187 +
+           co;
 }
 
 void build_pruning_table() {
@@ -63,10 +70,7 @@ void build_pruning_table() {
 
                 for(int move = 0; move < 18; move++) {
 
-                    int next_coord = mult_eop1(eop1, move) * 88179840 +
-                                     mult_cp(cp, move) * 2187 +
-                                     mult_co(co, move);
-
+                    int next_coord = build_table_index(mult_eop1(eop1, move), mult_cp(cp, move), mult_co(co, move));
                     if(table[next_coord] > depth + 1) {
                         table[next_coord] = depth + 1;
                     }
@@ -97,6 +101,7 @@ void build_pruning_table() {
     }
 
     fclose(fp);    
+    calculate_table_stats();
 
 }
 
@@ -109,6 +114,7 @@ void init_pruning_table() {
         perror("couldn't open pruning table");
         build_pruning_table();
     } else {
+        printf("loading pruning table...\n");
         fread(table, 1, TABLE_SIZE, fp);
         if(ferror(fp)) {
             perror("failed to read pruning table");
@@ -118,6 +124,54 @@ void init_pruning_table() {
         fclose(fp);
     }
 
-    calculate_table_stats();
+}
+
+bool search(Cube *cube, int last_turn_face, int depth, int max_depth, int *solution) {
+
+    if(depth == max_depth) {
+        return false;
+    }
+
+    for(int face = 0; face < 6; face++) {
+        
+        // don't evaluate moves that would cancel the previous one
+        if(last_turn_face == face)
+            continue;
+
+        // turns of opposite faces are commutative, we only need to evaluate
+        // each combination once
+        if((last_turn_face == FACE_D && face == FACE_U) ||
+           (last_turn_face == FACE_R && face == FACE_L) ||
+           (last_turn_face == FACE_B && face == FACE_F))
+            continue;
+        
+        for(int degree = 0; degree < 3; degree++) {
+
+            Cube next = *cube;
+            do_move(&next, face, degree);
+            
+            // if we've solved the cube, rejoice!
+            if(is_solved(&next)) {
+                solution[depth] = move_to_int(face, degree);
+                return true;
+            }
+
+            // try to prune
+            int remaining_moves = table[build_table_index(compute_eop1_coord(&next, 0), compute_cp_coord(&next), compute_co_coord(&next))];
+            if(depth + remaining_moves >= max_depth) {
+                continue;
+            }
+
+            // recursively search
+            if(search(&next, face, depth + 1, max_depth, solution)) {
+                solution[depth] = move_to_int(face, degree);
+                return true;
+            }
+
+        }
+
+    }
+
+    return false;
 
 }

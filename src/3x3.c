@@ -285,7 +285,7 @@ void get_cube_colors(Cube *cube, char *colors) {
          * position as the orientation for our cube, so white is on top and 
          * green is in front.
          */
-        char color1, color2, color3;
+        char color1 = '?', color2 = '?', color3 = '?';
         switch(cubie) {
             case ULB: color1 = 'W'; color2 = 'O'; color3 = 'B'; break;
             case ULF: color1 = 'W'; color2 = 'G'; color3 = 'O'; break;
