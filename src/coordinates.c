@@ -5,6 +5,7 @@
 
 unsigned int *co_mult_table;
 unsigned int *cp_mult_table;
+unsigned int *eop1_mult_table;
 
 // convert move to integer {0..17}
 int move_to_int(int face, int degree) {
@@ -60,6 +61,23 @@ int compute_cp_coord(Cube *cube) {
     }
 
     return coord;
+
+}
+
+/*
+ * Compute coordinate representing the position and orientation of edge 0.
+ */
+int compute_eop1_coord(Cube *cube, int edge) {
+
+    int edge_pos;
+    for(int i = 0; i < 12; i++) {
+        if(cube->edges[i] == edge) {
+            edge_pos = i;
+            break;
+        }
+    }
+
+    return 12 * cube->edge_orientations[edge] + edge_pos;
 
 }
 
@@ -149,16 +167,44 @@ void init_cp_mult_table() {
 
     /*
      * Decoding a Lehmer code is a bit of a pain, so instead we iterate over
-     * permutations using 
+     * permutations using Heap's algorithm.
      */
     uint8_t corners[] = {0, 1, 2, 3, 4, 5, 6, 7};
     permute_corners(corners, 8);
 
 }
 
+void init_eop1_mult_table() {
+
+    eop1_mult_table = malloc(18 * 24 * sizeof(unsigned int));
+
+    for(int coord = 0; coord < 24; coord++) {
+
+        int edge_pos = coord % 12, eo = coord / 12;
+
+        for(int face = 0; face < 6; face++) {
+            for(int degree = 0; degree < 3; degree++) {
+
+                // set up edge in correct location and orientation
+                Cube cube = create_solved_cube();
+                cube.edges[edge_pos] = 0;
+                cube.edges[0] = edge_pos;
+                cube.edge_orientations[0] = eo;
+
+                do_move(&cube, face, degree);
+                eop1_mult_table[coord * 18 + move_to_int(face, degree)] = compute_eop1_coord(&cube, 0);
+            
+            }
+        }
+
+    }
+
+}
+
 void init_mult_tables() {
     init_cp_mult_table();
     init_co_mult_table();
+    init_eop1_mult_table();
 }
 
 int mult_co(int co, int move) {
@@ -167,4 +213,8 @@ int mult_co(int co, int move) {
 
 int mult_cp(int cp, int move) {
     return cp_mult_table[cp * 18 + move];
+}
+
+int mult_eop1(int eop1, int move) {
+    return eop1_mult_table[eop1 * 18 + move];
 }

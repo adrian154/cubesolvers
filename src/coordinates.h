@@ -27,5 +27,6 @@
 void init_mult_tables();
 int mult_co(int co, int move);
 int mult_cp(int cp, int move);
+int mult_eop1(int eop1, int move);
 
 #endif

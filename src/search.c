@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TABLE_SIZE 88179840
+#define TABLE_SIZE 2116316160
 
 uint8_t *table;
 
@@ -16,7 +16,8 @@ void calculate_table_stats() {
         freq[i] = 0;
     }
 
-    int max = 0, sum = 0;
+    int max = 0;
+    unsigned long long sum = 0;
     for(int i = 0; i < TABLE_SIZE; i++) {
         freq[table[i]]++;
         max = table[i] > max ? table[i] : max;
@@ -35,7 +36,6 @@ void build_pruning_table() {
 
     printf("building pruning table...\n");
 
-    table = malloc(TABLE_SIZE);
     for(int i = 0; i < TABLE_SIZE; i++) {
         table[i] = 0xff;
     }
@@ -43,7 +43,7 @@ void build_pruning_table() {
     table[0] = 0;
 
     int depth = 0;
-    int nodes_explored = 1;
+    unsigned long long nodes_explored = 1;
 
     /*
      * Repeatedly scan through the table, searching for nodes that were just
@@ -57,10 +57,16 @@ void build_pruning_table() {
             
             if(table[i] == depth) {
 
-                int cp = i / 2187, co = i % 2187;
+                int eop1 = i / 88179840,
+                    cp = i / 2187 % 40320,
+                    co = i % 2187;
+
                 for(int move = 0; move < 18; move++) {
 
-                    int next_coord = mult_cp(cp, move) * 2187 + mult_co(co, move);
+                    int next_coord = mult_eop1(eop1, move) * 88179840 +
+                                     mult_cp(cp, move) * 2187 +
+                                     mult_co(co, move);
+
                     if(table[next_coord] > depth + 1) {
                         table[next_coord] = depth + 1;
                     }
@@ -73,7 +79,7 @@ void build_pruning_table() {
 
         }
 
-        printf("%d nodes explored at depth %d\n", nodes_explored, depth);
+        printf("%llu nodes explored at depth %d\n", nodes_explored, depth);
         depth++;
 
     }
@@ -91,11 +97,12 @@ void build_pruning_table() {
     }
 
     fclose(fp);    
-    calculate_table_stats();
 
 }
 
 void init_pruning_table() {
+
+    table = malloc(TABLE_SIZE);
 
     FILE *fp = fopen("corners.prune", "rb");
     if(fp == NULL) {
@@ -110,5 +117,7 @@ void init_pruning_table() {
         }
         fclose(fp);
     }
+
+    calculate_table_stats();
 
 }

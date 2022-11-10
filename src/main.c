@@ -1,4 +1,5 @@
 #include "search.h"
+#include "coordinates.h"
 #include <stdio.h>
 
 int main() {
