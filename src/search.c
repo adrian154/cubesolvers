@@ -1,6 +1,6 @@
 #include "search.h"
 #include "coordinates.h"
-#include "3x3.h"
+#include "cube.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -36,7 +36,7 @@ void calculate_table_stats() {
 int build_table_index(int eop1, int cp, int co) {
     return eop1 * 88179840 +
            cp * 2187 +
-           co;
+           co;  
 }
 
 void build_pruning_table() {

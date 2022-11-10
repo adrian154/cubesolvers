@@ -1,5 +1,5 @@
-// See 3x3.h for details on cube representation.
-#include "3x3.h"
+// See cube.h for details on cube representation.
+#include "cube.h"
 #include <stdio.h>
 #include <stdlib.h>
 
