@@ -17,7 +17,7 @@
  * corner permutation and corner orientation will require the same number of
  * moves to solve the corners, so we can organize the members of the cube group
  * into 8!*3^7 cosets. Every member of the coset is the same distance from the
- * target subgroup, so we only need to record 8!*3^7 values instead of |G|..
+ * target subgroup, so we only need to record 8!*3^7 values instead of |G|.
  *
  * We choose to work with coordinates instead of the cubie-based cube model in
  * our solver. Instead of recalculating coordinates after moves are applied, we
