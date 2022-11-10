@@ -131,7 +131,7 @@ void print_cube_raw(Cube *cube) {
 
     printf("\nedges: ");
     for(int i = 0; i < 12; i++) {
-        printf("%d=%d/%d ", i, cube->corners[i], cube->corner_orientations[cube->corners[i]]);
+        printf("%d=%d/%d ", i, cube->edges[i], cube->edge_orientations[cube->edges[i]]);
     }
     putchar('\n');
 

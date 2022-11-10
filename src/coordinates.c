@@ -16,16 +16,22 @@ int move_to_int(int face, int degree) {
  * so there are only really 7 degrees of freedom.
  */
 int compute_co_coord(Cube *cube) {
+    
     int coord = 0, base = 1;
     uint8_t corner_orientation[8];
+    
+    // corner orientation 
     for(int i = 0; i < 8; i++) {
         corner_orientation[i] = cube->corner_orientations[cube->corners[i]];
     }
+    
     for(int i = 0; i < 7; i++) {
         coord += corner_orientation[i] * base;
         base *= 3;
     }
+    
     return coord;
+
 }
 
 /*
@@ -64,18 +70,28 @@ void init_co_mult_table() {
     for(int coord = 0; coord < 2187; coord++) {
         for(int face = 0; face < 6; face++) {
 
-            uint8_t corner_orientation[7];
-            int coord_copy = coord;
+            uint8_t corner_orientation[8];
+            int coord_copy = coord, total_co = 0;
+            
+            /*
+             * Convert coordinate back into corner orientation values. We can
+             * do this without worrying about cubie permutation because we're
+             * operating on a solved cube.
+             */
             for(int i = 0; i < 7; i++) {
-                corner_orientation[i] = coord_copy % 3;
+                int co = coord_copy % 3;
+                corner_orientation[i] = co;
+                total_co += co;
                 coord_copy /= 3;
             }
+
+            corner_orientation[7] = (3 - total_co % 3) % 3;
 
             for(int degree = 0; degree < 3; degree++) {
 
                 // convert the coordinate into a cube
                 Cube cube = create_solved_cube();
-                memcpy(cube.corner_orientations, corner_orientation, 7);
+                memcpy(cube.corner_orientations, corner_orientation, 8);
 
                 // calculate new coordinate and store in table
                 do_move(&cube, face, degree);
