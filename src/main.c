@@ -1,6 +1,6 @@
 #include "search.h"
 #include "coordinates.h"
-#include "3x3.h"
+#include "cube.h"
 #include <stdio.h>
 
 void print_solution(int *solution) {

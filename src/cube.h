@@ -1,6 +1,6 @@
 // Explicit 3x3x3 Rubik's cube model
-#ifndef __3x3_H
-#define __3x3_H
+#ifndef __CUBE_H
+#define __CUBE_H
 
 #include <stdbool.h>
 #include <stdint.h>

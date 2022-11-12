@@ -2,7 +2,7 @@
 #define __COORDINATES_H
 
 #include <stdint.h>
-#include "3x3.h"
+#include "cube.h"
 
 /*
  * The Rubik's Cube group, usually just referred to as the "cube group" or G,
