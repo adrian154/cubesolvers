@@ -24,7 +24,7 @@ void print_solution(int *solution) {
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
 
     printf("initializing coordinate multiplication tables...\n");
     init_mult_tables();
@@ -32,7 +32,8 @@ int main() {
     printf("initializing pruning tables...\n");
     init_pruning_table();
 
-    Cube cube = create_random_cube();
+    Cube cube = create_solved_cube();
+    do_moves(&cube, argv[1]);
     print_cube(&cube, true);
     
     int solution[32];

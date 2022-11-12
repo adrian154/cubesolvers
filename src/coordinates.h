@@ -5,24 +5,43 @@
 #include "3x3.h"
 
 /*
- * The Rubik's Cube group, usually just referred to as the cube group or G,
+ * The Rubik's Cube group, usually just referred to as the "cube group" or G,
  * consists of the identity permutation and six face quarter turns
  * <L,R,F,B,U,D>. The group operation is the composition of permutations (i.e.
  * applying a sequence of moves to a cube state).
  * 
- * When creating a heuristic, what we're doing is building a pattern database
- * that tells us how many moves are necessary to bring any cube state to a 
- * certain subgroup. (The solved state has to be a member of this subgroup.)    
- * For example, suppose we decided to target the subgroup of all cubes where
- * the corners have been solved. Intuitively, all cube states with the same
- * corner permutation and corner orientation will require the same number of
- * moves to solve the corners, so we can organize the members of the cube group
- * into 8!*3^7 cosets. Every member of the coset is the same distance from the
- * target subgroup, so we only need to record 8!*3^7 values instead of |G|.
+ * Our goal is to create a heuristic that gives us a lower bound on the number
+ * of moves necessary to solve any cube state. We start by picking an 
+ * arbitrary subgroup of the cube group which the solved state is a member of.
+ * We observe that within cosets of this subgroup, every cube state within
+ * the coset is the same distance (number of moves) away from the subgroup.
+ * Thus, we only need to record one value per coset. We map cubes to cosets
+ * using coordinates.
+ *
+ * For example, consider the subgroup of cubes where the corners are solved.
+ * Within cosets of this subgroup, every member has the same corner orien-
+ * tation and permutation. Thus, we can map any cube state to a coset of this
+ * subgroup by calculating a unique integer that represents the corner orien-
+ * tation and permutation. 
+ * 
+ * This mapping produces 8!*3^7 cosets. The size of each coset is equal to
+ * |G|/(8!*3^7) = 490,497,638,400. This value makes sense; there are 
+ * 12!*2^11 = 490,497,638,400 x 2 = 980,995,276,800 possible combinations of
+ * edge orientation and permutation, but half of these have mismatched parity.
  *
  * We choose to work with coordinates instead of the cubie-based cube model in
- * our solver. Instead of recalculating coordinates after moves are applied, we
- * use fixed lookup tables for coordinate multiplication.
+ * our solver. Instead of applying a move to a Cube and recalculating the 
+ * coordinate values, we use lookup tables to simulate the application of a 
+ * move. This greatly speeds up pruning table generation.
+ * 
+ * SYMMETRY
+ * 
+ * The size of the pruning table is the limiting factor for how quickly we can
+ * search the problem space. Exploiting the cube's symmetrical qualities allow
+ * us to store a larger pruning table in a smaller amount of space. Intuitively,
+ * if we mirror a cube, it will still require the same amount of moves to solve.
+ * Our goal is to develop a coordinate that recognizes the  equivalence of these
+ * states and maps them to the same value.
  */
 
 void init_mult_tables();

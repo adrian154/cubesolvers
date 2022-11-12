@@ -9,22 +9,19 @@
  * number of moves necessary to solve any state, we can prune branches where the
  * current depth plus the value of the heuristic exceeds the depth limit.
  * 
- * We construct an admissible heuristic (one that never overestimates the number
- * of remaining moves) using the following strategy:
- * 
- *   - Identify a target subgroup of the cube group of which the solved state
- *     is a member.
- *   - Observe that within the cosets of this subgroup, every cube state within
- *     the coset is the same "distance" (number of moves) away from the 
- *     subgroup.
- *   - Thus, we only need to record one value per coset. Cube states are mapped
- *     to cosets via coordinates (see coordinates.h).
+ * PRUNING TABLES
  * 
  * We build our pruning tables using the strategy suggested by Kociemba: we
  * use the pruning table to conduct a BFS of cosets, exploring until the table
  * is populated. This unfortunately means that we are forced to search at a
  * branching factor of 18 (since without information on the last turned face
- * we cannot eliminate certin branches), but that's fine. 
+ * we cannot eliminate redundant branches), but this is not a big problem since
+ * the computational cost of building the pruning table is amortized across
+ * solves, so as long as it completes in a *reasonable* amount of time per-
+ * formance is not important.
+ * 
+ * See coordinates.h for more information on the mathematics of pruning tables.
+ *  
  */
 
 void init_pruning_table();
