@@ -87,6 +87,7 @@ typedef struct {
 bool is_solved(Cube *cube);
 Cube create_solved_cube();
 Cube create_random_cube();
+Cube create_random_ll(bool EP, bool CP, bool EO, bool CO);
 bool validate_cube(Cube *cube);
 void print_cube_raw(Cube *cube);
 void get_cube_colors(Cube *cube, char *colors);

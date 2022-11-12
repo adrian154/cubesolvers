@@ -137,6 +137,87 @@ void print_cube_raw(Cube *cube) {
 
 }
 
+// create cube with random last layer
+Cube create_random_ll(bool EP, bool CP, bool EO, bool CO) {
+
+    Cube cube = create_solved_cube();
+
+    for(int i = 0; i < 8; i++) {
+        cube.corners[i] = i;
+    }
+
+    for(int i = 0; i < 12; i++) {
+        cube.edges[i] = i;
+    }
+
+    uint8_t edges[] = {UL, UR, UB, UF};
+    uint8_t corners[] = {ULB, ULF, URB, URF};
+
+    if(EP) {
+        shuffle(edges, 4);
+    }
+    
+    if(CP) {
+        shuffle(corners, 4);
+    }
+
+    if(compute_parity(edges, 4) != compute_parity(corners, 4)) {
+        int tmp;
+        if(EP) {
+            tmp = edges[0];
+            edges[0] = edges[1];
+            edges[1] = tmp;
+        } else if(CP) {
+            tmp = corners[0];
+            corners[0] = corners[1];
+            corners[1] = tmp;
+        }
+    }
+
+    int eos[] = {0, 0, 0, 0};
+    int cos[] = {0, 0, 0, 0};
+
+    if(EO) {
+        int total_eo = 0;
+        for(int i = 0; i < 3; i++) {
+            int eo = rand() & 1;
+            total_eo += eo;
+            eos[i] = eo;
+        }
+        eos[3] = total_eo % 2;
+    }
+
+    if(CO) {
+        int total_co = 0;
+        for(int i = 0; i < 3; i++) {
+            int co = rand() % 3;
+            total_co += co;
+            cos[i] = co;
+        }
+        cos[3] = (3 - total_co % 3) % 3;
+    }
+
+    // apply to cube
+    cube.edges[UL] = edges[0];
+    cube.edges[UR] = edges[1];
+    cube.edges[UB] = edges[2];
+    cube.edges[UF] = edges[3];
+    cube.corners[ULB] = corners[0];
+    cube.corners[ULF] = corners[1];
+    cube.corners[URB] = corners[2];
+    cube.corners[URF] = corners[3];
+    cube.edge_orientations[UL] = eos[0];
+    cube.edge_orientations[UR] = eos[1];
+    cube.edge_orientations[UB] = eos[2];
+    cube.edge_orientations[UF] = eos[3];
+    cube.corner_orientations[ULB] = cos[0];
+    cube.corner_orientations[ULF] = cos[1];
+    cube.corner_orientations[URB] = cos[2];
+    cube.corner_orientations[URF] = cos[3];
+    return cube;
+
+}
+
 // create solvable cube
 Cube create_random_cube() {
     

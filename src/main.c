@@ -26,26 +26,31 @@ void print_solution(int *solution) {
 
 int main(int argc, char **argv) {
 
+    srand(time(NULL));
+
     printf("initializing coordinate multiplication tables...\n");
     init_mult_tables();
 
     printf("initializing pruning tables...\n");
     init_pruning_table();
 
-    Cube cube = create_solved_cube();
-    do_moves(&cube, argv[1]);
-    print_cube(&cube, true);
-    
-    int solution[32];
-    for(int i = 0; i < 32; i++) {
-        solution[i] = 0xff;
-    }
+    for(int i = 0; i < 16; i++) {
+        printf("\n==============================\n%d=%s%s%s%s\n", i, i&1?"EP ":"", i&2?"CP ":"", i&4?"EO ":"", i&8?"CO ":"");
+        Cube cube = create_random_ll(i&1,i&2,i&4,i&8);
+        validate_cube(&cube);
+        print_cube(&cube, true);
+        
+        int solution[32];
+        for(int i = 0; i < 32; i++) {
+            solution[i] = 0xff;
+        }
 
-    for(int depth = 0; depth < 21; depth++) {
-        printf("searching depth %d\n", depth);
-        if(search(&cube, -1, 0, depth, solution)) {
-            print_solution(solution);
-            break;
+        for(int depth = 0; depth < 21; depth++) {
+            printf("searching %d\n", depth);
+            if(search(&cube, -1, 0, depth, solution)) {
+                print_solution(solution);
+                break;
+            }
         }
     }
 
