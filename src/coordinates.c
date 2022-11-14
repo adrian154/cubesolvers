@@ -4,6 +4,7 @@
 
 unsigned int *co_mult_table;
 unsigned int *eo_mult_table;
+unsigned int *ec_mult_table;
 
 // convert move to integer {0..17}
 int move_to_int(int  face, int degree) {
@@ -29,6 +30,28 @@ int compute_eo_coord(Cube *cube) {
         coord |= cube->edge_orientations[cube->edges[i]] << i;
     }
     return coord;
+}
+
+int compute_ec_coord(Cube *cube) {
+
+    int edge_pos = 0, corner_pos = 0;
+
+    for(int i = 0; i < 12; i++) {
+        if(cube->edges[i] == 0) {
+            edge_pos = i;
+            break;
+        }
+    }
+
+    for(int i = 0; i < 8; i++) {
+        if(cube->corners[i] == 0) {
+            corner_pos = i;
+            break;
+        }
+    }
+
+    return corner_pos * 12 + edge_pos;
+
 }
 
 /*
@@ -115,11 +138,11 @@ void init_eo_mult_table() {
 
     for(int coord = 0; coord < 2048; coord++) {
 
-        uint8_t edge_orientation[8];
+        uint8_t edge_orientation[12];
         int total_eo = 0;
 
         for(int i = 0; i < 11; i++) {
-            int eo = coord & (1 << i);
+            int eo = (coord >> i) & 1;
             edge_orientation[i] = eo;
             total_eo += eo;
         }
@@ -134,6 +157,16 @@ void init_eo_mult_table() {
                 eo_mult_table[coord * 18 + move_to_int(face, degree)] = compute_eo_coord(&cube);
             }
         }
+    }
+
+}
+
+void init_ec_mult_table() {
+
+    for(int coord = 0; coord < 96; coord++) {
+
+        uint8_t 
+
     }
 
 }
@@ -187,8 +220,8 @@ void init_cp_mult_table() {
 */
 
 void init_mult_tables() {
-    init_cp_mult_table();
     init_co_mult_table();
+    init_eo_mult_table();
 }
 
 int mult_co(int co, int move) {

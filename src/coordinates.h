@@ -10,6 +10,14 @@
  * <L,R,F,B,U,D>. The group operation is the composition of permutations (i.e.
  * applying a sequence of moves to a cube state).
  * 
+ * Based on the definition of a group, the cube group operation has the 
+ * following properties:
+ * 
+ *   - It is closed; any operation on a member of the cube group produces 
+ *     another member of the cube group.
+ *   - It is associative; A*(B*C) = (A*B)*C.
+ *   - Every element has an inverse.
+ * 
  * Our goal is to create a heuristic that gives us a lower bound on the number
  * of moves necessary to solve any cube state. We start by picking an 
  * arbitrary subgroup of the cube group which the solved state is a member of.
