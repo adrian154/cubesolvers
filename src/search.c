@@ -6,14 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TABLE_SIZE 4478976
+#define TABLE_SIZE 429981696
 
 uint8_t *table;
 
 void calculate_table_stats() {
 
-    int freq[32];
-    for(int i = 0; i < 32; i++) {
+    int freq[256];
+    for(int i = 0; i < 256; i++) {
         freq[i] = 0;
     }
 
@@ -33,8 +33,8 @@ void calculate_table_stats() {
 
 }
 
-int build_table_index(int co, int eo) {
-    return eo * 2187 + co;  
+int build_table_index(int co, int eo, int ec) {
+    return ec * 4478976 + eo * 2187 + co;  
 }
 
 void build_pruning_table() {
@@ -62,12 +62,13 @@ void build_pruning_table() {
             
             if(table[i] == depth) {
 
-                int eo = i / 2187,
+                int ec = i / 4478976,
+                    eo = (i % 4478976) / 2187,
                     co = i % 2187;
 
                 for(int move = 0; move < 18; move++) {
 
-                    int next_coord = build_table_index(mult_co(co, move), mult_eo(eo, move));
+                    int next_coord = build_table_index(mult_co(co, move), mult_eo(eo, move), mult_ec(ec, move));
 
                     if(table[next_coord] > depth + 1) {
                         table[next_coord] = depth + 1;
@@ -155,7 +156,7 @@ bool search(Cube *cube, int last_turn_face, int depth, int max_depth, int *solut
             }
 
             // try to prune
-            int remaining_moves = table[build_table_index(compute_co_coord(&next), compute_eo_coord(&next))];
+            int remaining_moves = table[build_table_index(compute_co_coord(&next), compute_eo_coord(&next), compute_ec_coord(&next))];
             if(depth + remaining_moves >= max_depth) {
                 continue;
             }

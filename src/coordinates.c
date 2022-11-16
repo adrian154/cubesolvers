@@ -4,7 +4,8 @@
 
 unsigned int *co_mult_table;
 unsigned int *eo_mult_table;
-unsigned int *ec_mult_table;
+
+unsigned int *eslice_seq2perm_table;
 
 // convert move to integer {0..17}
 int move_to_int(int  face, int degree) {
@@ -54,41 +55,41 @@ int compute_ec_coord(Cube *cube) {
 
 }
 
-/*
- * eslice_raw represents the position of the four E-slice edge cubies. It has
- * 12P4 = 11880 possible values, which are reduced to <TODO> equivalence 
- * classes via symmetry reduction.
- * 
- * The process we use to map permutations to integers is known  as a Lehmer
- * code. In a nutshell, we convert each element of the permutation at position
- * `i` to a value {0..i-1} by counting how many elements smaller than the 
- * current one occur to the left of it. We can then interpret these values as
- * digits of a factorial-base number, producing our index.
- */
-int compute_eslice_raw_coord(Cube *cube) {
-    
-    /*
-     * Since we're dealing with a partial permutation, our base is nPr instead
-     * of n!.
-     */
-    static int base[] = {990, 90, 9, 1};
+int compute_eslice_coord(Cube *cube) {
 
-    /*
-     * We record which elements we've seen so far in a bitmap. This allows us
-     * to determine how many elements smaller than the current one have been
-     * encountered already by using POPCNT. This is based on the approach
-     * suggested by Richard Korf in "Large-Scale Parallel Breadth-First Search",
-     * except he used the shifted mask as an index into a lookup table (Which
-     * is probably slower on modern hardware). 
-     */
-    int seen_mask = 0, coord = 0;
-    for(int i = 0; i < 4; i++) {
-        int cubie = cube->corners[i];
-        seen_mask |= 1 << (3 - cubie);
-        coord += (cubie - __builtin_popcount(seen_mask >> (4 - cubie))) * base[i];
+    
+
+}
+
+int init_eslice_mult_table(Cube *cube) {
+
+    unsigned int *eslice_perm2seq_table = malloc(11880 * sizeof(unsigned int)); // 12p4 = 11880
+    eslice_seq2perm_table = malloc(20736 * sizeof(unsigned int)); // 12^4 = 20736
+
+    // Generate all possible 12P4 in a rather stupid way.
+    int perm = 0;
+    for(int i0 = 0; i0 < 12; i0++) {   
+        for(int i1 = 0; i1 < 12; i1++) {
+            if(i1 == i0) continue;
+            for(int i2 = 0; i2 < 12; i2++) {
+                if(i2 == i0 || i2 == i1) continue;
+                for(int i3 = 0; i3 < 12; i3++) {
+                    if(i3 == i0 || i3 == i1 || i3 == i2) continue;
+                    
+                    int seq = i0 + i1 * 12 + i2 * 144 + i3 * 1728;
+                    eslice_seq2perm_table[seq] = perm;
+                    eslice_perm2seq_table[perm] = seq;
+
+                    perm++;
+
+                }
+            }
+        }
     }
 
-    return coord;
+    // Create multiplication tables for the e-slice raw coordinate
+
+    free(eslice_perm2seq_table);
 
 }
 
@@ -161,15 +162,6 @@ void init_eo_mult_table() {
 
 }
 
-void init_ec_mult_table() {
-
-    for(int coord = 0; coord < 96; coord++) {
-
-        uint8_t 
-
-    }
-
-}
 
 /*
 void permute_corners(uint8_t *corners, int k) {
@@ -222,6 +214,7 @@ void init_cp_mult_table() {
 void init_mult_tables() {
     init_co_mult_table();
     init_eo_mult_table();
+    init_ec_mult_table();
 }
 
 int mult_co(int co, int move) {
@@ -230,4 +223,8 @@ int mult_co(int co, int move) {
 
 int mult_eo(int eo, int move) {
     return eo_mult_table[eo * 18 + move];
+}
+
+int mult_ec(int ec, int move) {
+    return ec_mult_table[ec * 18 + move];
 }

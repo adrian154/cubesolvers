@@ -55,8 +55,10 @@
 void init_mult_tables();
 int compute_co_coord(Cube *cube);
 int compute_eo_coord(Cube *cube);
+int compute_ec_coord(Cube *cube);
 int mult_co(int co, int move);
 int mult_eo(int cp, int move);
+int mult_ec(int ec, int move);
 int move_to_int(int face, int degree);
 
 #endif
